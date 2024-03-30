@@ -1,7 +1,7 @@
 /**
  * Solves the given maze using DFS or BFS
- * @author Ms. Namasivayam
- * @version 03/10/2023
+ * @author Ms. Namasivayam and Sofia Aguilar
+ * @version 03/29/2024
  */
 
 import java.util.ArrayList;
@@ -31,29 +31,29 @@ public class MazeSolver {
      */
     public ArrayList<MazeCell> getSolution() {
         // TODO: Get the solution from the maze
-        // Should be from start to end cells
 
-        // Complete the function getSolution() that returns the solution to the maze as
-        // an ArrayList of MazeCells in order from start to end.
+        // will get the solution in reverse order
+        Stack<MazeCell> reverseOrderPath = new Stack<>();
 
-        //To get the solution to the maze, remember that you have to start at the
-        // END of the maze and follow each cell’s parent back to the start. This will
-        // get you the solution in reverse order, so you must then reverse it to get an
-        // inorder solution.
-        Stack<MazeCell> s = new Stack<>();
-        MazeCell temp = maze.getEndCell();
-        while (temp != maze.getStartCell().getParent()) {
-            s.push(temp);
-            temp = temp.getParent();
+        // start at the end of the maze
+        MazeCell mazeCellParent = maze.getEndCell();
+
+        // follow's each cell's parent back to the start and push into the stack
+        while (mazeCellParent != maze.getStartCell().getParent()) {
+            reverseOrderPath.push(mazeCellParent);
+            mazeCellParent = mazeCellParent.getParent();
         }
 
+        // will get the solution from start to end
+        ArrayList<MazeCell> solutionPath = new ArrayList<>();
 
-        ArrayList<MazeCell> grid = new ArrayList<>();
-        while (!s.isEmpty()) {
-            grid.add(s.pop());
+        // from the stack that has the path in reverse order, pop everything out, until empty, into the solutionPath-
+        // and get the solution inorder
+        while (!reverseOrderPath.isEmpty()) {
+            solutionPath.add(reverseOrderPath.pop());
         }
 
-        return grid;
+        return solutionPath;
     }
 
     /**
@@ -62,95 +62,105 @@ public class MazeSolver {
      */
     public ArrayList<MazeCell> solveMazeDFS() {
         // TODO: Use DFS to solve the maze
-        Stack<MazeCell> cellsToVist = new Stack<>();
-        // Explore the cells in the order: NORTH, EAST, SOUTH, WEST
-        ArrayList<MazeCell> exploredCells = new ArrayList<>();
+
+        // stack of the cells to possibly go to next
+        Stack<MazeCell> cellsToVisit = new Stack<>();
+
+        // start the current cell at the start
         MazeCell currentCell = maze.getStartCell();
-        // Push the start cell onto the stack
-        cellsToVist.push(currentCell);
-        exploredCells.add(currentCell);
 
-        while(!cellsToVist.empty()){
-            currentCell = cellsToVist.peek();
-//            exploredCells.add(currentCell);
+        // continue through the maze until the current cell reaches the end
+        while(currentCell != maze.getEndCell()){
+            int row = currentCell.getRow();
+            int col = currentCell.getCol();
 
-            // Check if the current cell is the end cell
-            if (currentCell == maze.getEndCell()) {
-                return getSolution();
+            // first check the north neighbor if it is valid to possibly go and if so adding to cellsToVist, and setting the
+            // parent of the neighbor and making it a cell explored
+            if (maze.isValidCell(row -1, col)){
+                cellsToVisit.push(maze.getCell(row -1, col));
+                maze.getCell(row -1, col).setParent(currentCell);
+                maze.getCell(row -1, col).setExplored(true);
             }
 
-            MazeCell neighbor;
-            // put everything into cellsTo Vist
-            // north
+            // next check the east neighbor to see if valid and explore it if so(same as the north explanation)
+            if (maze.isValidCell(row, col + 1)){
+                cellsToVisit.push(maze.getCell(row, col+1));
+                maze.getCell(row, col+1).setParent(currentCell);
+                maze.getCell(row, col+1).setExplored(true);
+            }
 
+            // next check the south neighbor to see if valid and explore it if so
+            if (maze.isValidCell(row +1, col)){
+                cellsToVisit.push(maze.getCell(row +1, col));
+                maze.getCell(row +1, col).setParent(currentCell);
+                maze.getCell(row +1, col).setExplored(true);
+            }
 
+            // next check the west neighbor to see if valid and explore it if so
+            if (maze.isValidCell(row, col-1)){
+                cellsToVisit.push(maze.getCell(row , col-1));
+                maze.getCell(row, col-1).setParent(currentCell);
+                maze.getCell(row, col-1).setExplored(true);
+            }
+
+            // change the currentcell to the top of the stack
+            currentCell = cellsToVisit.pop();
         }
 
-        // inizalize the current cell and look at the neighbors and hass to cells to vists
-
-        //Think carefully about the data structure required to perform a depth-first search.
-        //Explore your neighbors in the order NORTH, EAST, SOUTH, WEST
-        //Return the ArrayList of MazeCells in the proper order
-        // (they should be listed from start to end). You should call
-        // getSolution() to help you do this.
-
-        return null;
+        // return the solution path
+        return getSolution();
     }
 
     /**
      * Performs a Breadth-First Search to solve the Maze
      * @return An ArrayList of MazeCells in order from the start to end cell
      */
-    public ArrayList<MazeCell> solveMazeBFS() {
+    public ArrayList<MazeCell> solveMazeBFS(){
         // TODO: Use BFS to solve the maze
+
+        // Queue to hold all of the cells to go to next
         Queue<MazeCell> cellsToVist = new LinkedList<>();
-        // first add the start
-        cellsToVist.add(maze.getStartCell());
 
-        // the visted cells
-        ArrayList<MazeCell> vistedCells = new ArrayList<>();
-        vistedCells.add(maze.getStartCell());
+        // start the current cell at the start
+        MazeCell currentCell = maze.getStartCell();
 
-        while(!cellsToVist.isEmpty()){
-            for (int i = 0; i < cellsToVist.size(); i++){
-                // Remove the first cell from the queue
-                MazeCell currentCell = cellsToVist.remove();
-                MazeCell neighbor;
+        // continue through the maze until the current cell reaches the end
+        while(currentCell != maze.getEndCell()){
+            int row = currentCell.getRow();
+            int col = currentCell.getCol();
 
-                // Check if the current cell is the end cell
-                if (currentCell.equals(maze.getEndCell())) {
-                    // If yes, return the solution
-                    return getSolution();
-                }
-                // north
-                if (maze.isValidCell(currentCell.getRow() -1, currentCell.getCol())){
-                    neighbor = maze.getCell(currentCell.getRow() -1,currentCell.getCol());
-                    cellsToVist.add(neighbor);
-                }
-                //east
-                else if (maze.isValidCell(currentCell.getRow(), currentCell.getCol() + 1)){
-                    neighbor = maze.getCell(currentCell.getRow(),currentCell.getCol()+1);
-                    cellsToVist.add(neighbor);
-                }
-                // south
-                else if (maze.isValidCell(currentCell.getRow() + 1, currentCell.getCol())){
-                    neighbor = maze.getCell(currentCell.getRow() +1,currentCell.getCol());
-                    cellsToVist.add(neighbor);
-                }
-                //west
-                else if (maze.isValidCell(currentCell.getRow(), currentCell.getCol()- 1)){
-                    neighbor = maze.getCell(currentCell.getRow(),currentCell.getCol()-1);
-                    cellsToVist.add(neighbor);
-                }
-
-                // check all of ite neighbors to see where we could go next
-              // Save all the neighbors so that we know where we can go next.
-                // Move to the next cell to visit.
+            // first check the north neighbor if it is valid to possibly go and if so adding to cellsToVist, and setting the
+            // parent of the neighbor and making it a cell explored
+            if (maze.isValidCell(row -1, col)){
+                cellsToVist.add(maze.getCell(row -1, col));
+                maze.getCell(row -1, col).setParent(currentCell);
+                maze.getCell(row -1, col).setExplored(true);
             }
+            // next check the east neighbor to see if valid and explore it if so(same as the north explanation)
+            if (maze.isValidCell(row, col + 1)){
+                cellsToVist.add(maze.getCell(row, col+1));
+                maze.getCell(row , col+1).setParent(currentCell);
+                maze.getCell(row , col+1).setExplored(true);
+            }
+            // next check the south neighbor if it is valid to possibly go to and explore it if so
+            if (maze.isValidCell(row +1, col)){
+                cellsToVist.add(maze.getCell(row +1, col));
+                maze.getCell(row +1, col).setParent(currentCell);
+                maze.getCell(row +1, col).setExplored(true);
+            }
+            // lastly check the west neighbor if it is valid to possibly go to and explore it if so
+            if (maze.isValidCell(row, col-1)){
+                cellsToVist.add(maze.getCell(row , col-1));
+                maze.getCell(row , col-1).setParent(currentCell);
+                maze.getCell(row , col-1).setExplored(true);
+            }
+
+            // change the currentcell to the first thing in the queue
+            currentCell = cellsToVist.remove();
         }
 
-        // Explore the cells in the order: NORTH, EAST, SOUTH, WEST
-        return vistedCells;
+        // return the solution path
+        return getSolution();
     }
 
     public static void main(String[] args) {
@@ -161,7 +171,7 @@ public class MazeSolver {
         MazeSolver ms = new MazeSolver();
         ms.setMaze(maze);
 
-        // Solve the maze using DFS and print the solution
+        //  Solve the maze using DFS and print the solution
         ArrayList<MazeCell> sol = ms.solveMazeDFS();
         maze.printSolution(sol);
 

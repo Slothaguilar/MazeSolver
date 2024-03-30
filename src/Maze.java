@@ -1,7 +1,7 @@
 /**
  * Creates a Maze made up of MazeCells
- * @author Ms. Namasivayam
- * @version 03/04/2022
+ * @author Ms. Namasivayam and Sofia Aguilar
+ * @version 03/29/2024
  */
 
 import java.io.File;
@@ -147,13 +147,15 @@ public class Maze {
      */
     public boolean isValidCell(int row, int col) {
         // TODO: Complete this function
+        // check to see if the row and colum given is negative and if true then return its invalid
         if (row < 0 || col < 0){
             return false;
         }
-        else if (row > numRows || col > numCols){
+        // checks to see if rows and colum given is greater than the number of rows and cols and if true return invalid
+        else if (row >= numRows || col >= numCols){
             return false;
         }
-        return startCell.isWall() || startCell.isExplored();
-        // return true;
+        // finally returns true or false on if the cell is a wall and if it already has been explored
+        return !mazeGrid[row][col].isWall() && !mazeGrid[row][col].isExplored();
     }
 }
